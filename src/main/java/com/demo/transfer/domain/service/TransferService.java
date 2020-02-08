@@ -40,14 +40,6 @@ public class TransferService {
     }
 
     public Transfer doTransfer(Transfer transfer) {
-        // 以交易流水号为唯一索引，插入去重表，防止重复扣款
-        TransferRecord transferRecord;
-        try {
-            transferRecord = generateTransferRecord(transfer);
-        } catch (Exception e) {
-            return transfer;
-        }
-
         Account payerAccount = Optional.ofNullable(accountRepository.findByNumber(transfer.getPayerAccountNumber()))
             .orElseThrow(() -> new AccountNotFoundException(transfer, transfer.getPayerAccountNumber()));
         Account payeeAccount = Optional.ofNullable(accountRepository.findByNumber(transfer.getPayeeAccountNumber()))
@@ -57,9 +49,8 @@ public class TransferService {
         preCheck(payerAccount, payeeAccount, transfer);
 
         // 扣款操作，开启事务
-        minusBalance(payerAccount, transferRecord, transfer.getAmount());
+        minusBalance(payerAccount, transfer);
 
-        transfer.setEndTime(LocalDateTime.now());
         return transfer;
     }
 
@@ -98,22 +89,33 @@ public class TransferService {
      * 步骤2： 执行本地扣款操作，并更新交易状态，本地事务可以保证操作的原子性；
      * 步骤3： 用步骤 1 的消息地址，更改消息状态为 done，表示可以被消费
      *
-     * @param payerAccount：   扣款账户
-     * @param transferRecord： 交易记录
-     * @param amount：交易金额
+     * @param payerAccount： 扣款账户
+     * @param transfer：     交易信息
      * @return: void
      * date: 2020/2/8 <br>
      * version: 1.0 <br>
      */
     @Transactional
-    public void minusBalance(Account payerAccount, TransferRecord transferRecord, BigDecimal amount) {
+    public void minusBalance(Account payerAccount, Transfer transfer) {
+        // 以交易流水号为唯一索引，插入去重表，防止重复扣款
+        TransferRecord transferRecord;
+        try {
+            transferRecord = generateTransferRecord(transfer);
+        } catch (Exception e) {
+            return;
+        }
         String messageAddress = mqTemplate.syncSend(new DeductAccountEvent(PREPARE, transferRecord));
         if (messageAddress == null) {
             throw new TransferException(transferRecord, "扣款失败");
         }
-        accountRepository.minusAmount(payerAccount, amount);
-        transferRecordRepository.updateTransferStatus(transferRecord, SUCCEED);
+        // 采用乐观锁以version字段作为区分，如果更新的行数为0，则表示转账为成功
+        boolean success = accountRepository.minusAmount(payerAccount, transfer.getAmount())
+            && transferRecordRepository.updateTransferStatus(transferRecord, SUCCEED);
+        if (!success) {
+            throw new TransferException(transferRecord, "扣款失败");
+        }
         mqTemplate.overrideMessage(messageAddress, new DeductAccountEvent(DONE, transferRecord));
+        transfer.setEndTime(LocalDateTime.now());
     }
 
     public boolean receipt(TransferRecord transferRecord) {
@@ -122,28 +124,28 @@ public class TransferService {
             if (payeeAccount == null || !payeeAccount.isNormal()) {
                 return false;
             }
-            addBalance(payeeAccount, transferRecord);
+            return addBalance(payeeAccount, transferRecord);
         } catch (Exception e) {
             return false;
         }
-        return true;
     }
 
     /**
      * description: 收款人账户加钱，同样利用交易流水线的唯一性，保障不会因为重试而被多次加钱
      *
-     * @param payeeAccount： 收款账户
+     * @param payeeAccount：   收款账户
      * @param transferRecord： 交易记录
      * @return: void
      * date: 2020/2/8 <br>
      * version: 1.0 <br>
      */
     @Transactional
-    public void addBalance(Account payeeAccount, TransferRecord transferRecord) {
-        accountRepository.addBalance(payeeAccount, transferRecord.getAmount());
+    public boolean addBalance(Account payeeAccount, TransferRecord transferRecord) {
+        boolean success = accountRepository.addBalance(payeeAccount, transferRecord.getAmount());
         transferRecord.setEndTime(LocalDateTime.now());
         transferRecord.setStatus(SUCCEED);
         transferRecordRepository.save(transferRecord);
+        return success;
     }
 
     public void reverse(TransferRecord transferRecord) {

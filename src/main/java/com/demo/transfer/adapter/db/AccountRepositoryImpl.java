@@ -5,7 +5,6 @@ import com.demo.transfer.domain.repository.AccountRepository;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  * description: AccountRepositoryImpl <br>
@@ -21,12 +20,12 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public void minusAmount(Account payerAccount, BigDecimal amount) {
-
+    public boolean minusAmount(Account payerAccount, BigDecimal amount) {
+        return true;
     }
 
     @Override
-    public void addBalance(Account payeeAccount, BigDecimal amount) {
-
+    public boolean addBalance(Account payeeAccount, BigDecimal amount) {
+        return true;
     }
 }

@@ -20,13 +20,13 @@ public interface TransferRecordRepository {
 
     /**
      * description: 更新转账记录状态 <br>
-     * @param transferRecord： 转账记录
-     * @param newStatus：新状态
-     * @return: void
+     * @param transferRecord ： 转账记录
+     * @param newStatus ：新状态
+     * @return: boolean
      * date: 2020/2/8 <br>
      * version: 1.0 <br>
      */
-    void updateTransferStatus(TransferRecord transferRecord, TransferStatus newStatus);
+    boolean updateTransferStatus(TransferRecord transferRecord, TransferStatus newStatus);
 
     TransferRecord findByOrderSeq(String orderSeq);
 

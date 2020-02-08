@@ -1,13 +1,11 @@
 package com.demo.transfer.adapter.db;
 
-import com.demo.transfer.domain.model.Account;
 import com.demo.transfer.domain.model.TransferRecord;
 import com.demo.transfer.domain.model.TransferStatus;
-import com.demo.transfer.domain.repository.AccountRepository;
 import com.demo.transfer.domain.repository.TransferRecordRepository;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * description: AccountRepositoryImpl <br>
@@ -24,7 +22,17 @@ public class TransferRecordRepositoryImpl implements TransferRecordRepository {
     }
 
     @Override
-    public void updateTransferStatus(TransferRecord transferRecord, TransferStatus newStatus) {
+    public boolean updateTransferStatus(TransferRecord transferRecord, TransferStatus newStatus) {
+        return true;
+    }
 
+    @Override
+    public TransferRecord findByOrderSeq(String orderSeq) {
+        return null;
+    }
+
+    @Override
+    public List<TransferRecord> findByStatus(TransferStatus status) {
+        return null;
     }
 }
