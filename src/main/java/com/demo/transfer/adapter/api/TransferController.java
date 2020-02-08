@@ -1,19 +1,17 @@
 package com.demo.transfer.adapter.api;
 
-import com.demo.transfer.adapter.api.dto.TransferRequest;
-import com.demo.transfer.adapter.api.dto.TransferResponse;
+import com.demo.transfer.adapter.api.dto.*;
 import com.demo.transfer.application.TransferApplicationService;
 import com.demo.transfer.common.Result;
 import com.demo.transfer.domain.exception.TransferException;
-import com.demo.transfer.domain.model.Transfer;
+import com.demo.transfer.domain.model.TransferRecord;
+import com.demo.transfer.domain.model.TransferStatus;
 import com.demo.transfer.domain.service.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/transfers")
@@ -35,7 +33,25 @@ public class TransferController {
         if (!securityService.securitySCheck(transferRequest.getSecret())) {
             throw new TransferException("请求非法");
         }
-        Transfer transfer = transferApplicationService.transfer(transferRequest.toTransfer());
-        return Result.success(TransferResponse.from(transfer));
+        TransferRecord transferRecord = transferApplicationService.beginTransfer(transferRequest.toTransfer());
+        return Result.success(TransferResponse.from(transferRecord));
+    }
+
+    @GetMapping("/status")
+    public Result<TransferStatusResponse> queryTransferStatus(@RequestParam String orderSeq) {
+        TransferStatus transferStatus = transferApplicationService.queryTransferStatus(orderSeq);
+        return Result.success(new TransferStatusResponse(orderSeq, transferStatus));
+    }
+
+    @GetMapping("/order-seq")
+    public Result<OrderSeqResponse> getOrderSeq() {
+        return Result.success(new OrderSeqResponse(UUID.randomUUID().toString()));
+    }
+
+    @PostMapping("/callback")
+    public Result<TransferResponse> callback(@Valid @RequestBody TransferCallbackRequest callbackRequest) {
+        TransferRecord transferRecord = transferApplicationService.callback(
+            callbackRequest.getOrderSeq(), callbackRequest.getStatus());
+        return Result.success(TransferResponse.from(transferRecord));
     }
 }

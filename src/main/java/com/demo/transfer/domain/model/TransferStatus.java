@@ -1,5 +1,16 @@
 package com.demo.transfer.domain.model;
 
+/**
+ * description: 交易状态
+ *      BEGIN - 开始转账
+ *      DEDUCTED - 已扣款
+ *      RECEIVING - 收款中
+ *      SUCCEED - 成功
+ *      FAILED - 失败
+ * date: 2020/2/8 <br>
+ * author: Kehong <br>
+ * version: 1.0 <br>
+ */
 public enum TransferStatus {
-    BEGIN, SUCCEED, FAILED
+    BEGIN, DEDUCTED, RECEIVING, SUCCEED, FAILED
 }

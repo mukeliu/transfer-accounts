@@ -5,6 +5,8 @@ import com.demo.transfer.domain.repository.TransferRecordRepository;
 import com.demo.transfer.domain.service.TransferService;
 import org.springframework.stereotype.Component;
 
+import static com.demo.transfer.domain.model.TransferStatus.FAILED;
+
 /**
  * description: FailedReceiptTransferCompensation <br>
  * date: 2020/2/8 <br>
@@ -23,7 +25,12 @@ public class FailedReceiptTransferCompensationScheduler {
     }
 
     public void execute() {
-        transferRecordRepository.findByStatus(TransferStatus.FAILED)
+        transferRecordRepository.findByStatus(TransferStatus.RECEIVING).stream()
+            .peek(transferRecord -> {
+                TransferStatus transferStatus = transferRecordRepository.queryReceiptStatus(transferRecord.getOrderSeq());
+                transferRecord.setStatus(transferStatus);
+            })
+            .filter(transferRecord -> transferRecord.getStatus() == FAILED)
             .forEach(transferService::reverse);
     }
 }

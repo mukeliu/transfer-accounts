@@ -7,6 +7,7 @@ public class Account {
     private Long id;
     private String number;
     private BigDecimal balance;
+    private BigDecimal freezeAmount;
     private String name;
     private String phoneNumber;
     private AccountStatus status;

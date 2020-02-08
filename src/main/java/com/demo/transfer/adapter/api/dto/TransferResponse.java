@@ -1,6 +1,8 @@
 package com.demo.transfer.adapter.api.dto;
 
 import com.demo.transfer.domain.model.Transfer;
+import com.demo.transfer.domain.model.TransferRecord;
+import com.demo.transfer.domain.model.TransferStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,15 +16,19 @@ public class TransferResponse {
     private BigDecimal amount;
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
+    private TransferStatus status;
 
-    public static TransferResponse from(Transfer transfer) {
+    public static TransferResponse from(TransferRecord transferRecord) {
         TransferResponse transferResponse = new TransferResponse();
-        transferResponse.setOrderSeq(transfer.getOrderSeq());
-        transferResponse.setAmount(transfer.getAmount());
-        transferResponse.setPayerAccountNumber(transfer.getPayerAccountNumber());
-        transferResponse.setPayerName(transfer.getPayerName());
-        transferResponse.setPayeeAccountNumber(transfer.getPayeeAccountNumber());
-        transferResponse.setPayeeName(transfer.getPayeeName());
+        transferResponse.setOrderSeq(transferRecord.getOrderSeq());
+        transferResponse.setAmount(transferRecord.getAmount());
+        transferResponse.setPayerAccountNumber(transferRecord.getPayerAccountNumber());
+        transferResponse.setPayerName(transferRecord.getPayerName());
+        transferResponse.setPayeeAccountNumber(transferRecord.getPayeeAccountNumber());
+        transferResponse.setPayeeName(transferRecord.getPayeeName());
+        transferResponse.setStatus(transferRecord.getStatus());
+        transferResponse.setBeginTime(transferRecord.getBeginTime());
+        transferResponse.setEndTime(transferRecord.getEndTime());
         return transferResponse;
     }
 
@@ -88,5 +94,13 @@ public class TransferResponse {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public TransferStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransferStatus status) {
+        this.status = status;
     }
 }

@@ -1,17 +1,12 @@
 package com.demo.transfer.scheduler;
 
 import com.demo.transfer.common.BaseEvent;
-import com.demo.transfer.common.MqMessage;
 import com.demo.transfer.common.MqMessageStatus;
 import com.demo.transfer.common.MqTemplate;
 import com.demo.transfer.domain.model.DeductAccountEvent;
-import com.demo.transfer.domain.model.TransferRecord;
 import com.demo.transfer.domain.model.TransferStatus;
 import com.demo.transfer.domain.repository.TransferRecordRepository;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 import static com.demo.transfer.common.MqMessageStatus.DONE;
 
@@ -39,8 +34,8 @@ public class PrepareMessageCompensationScheduler {
         mqTemplate.retrieveMqMessages(BaseEvent.class, MqMessageStatus.PREPARE)
             .forEach(mqMessage -> {
                 String orderSeq = ((DeductAccountEvent) mqMessage.getPayload()).getTransferRecord().getOrderSeq();
-                Optional.ofNullable(transferRecordRepository.findByOrderSeq(orderSeq))
-                    .filter(transferRecord -> transferRecord.getStatus() == TransferStatus.SUCCEED)
+                transferRecordRepository.findByOrderSeq(orderSeq)
+                    .filter(transferRecord -> transferRecord.getStatus() == TransferStatus.DEDUCTED)
                     .ifPresent(transferRecord -> {
                         mqTemplate.overrideMessage(mqMessage.getAddress(), new DeductAccountEvent(DONE, transferRecord));
                     });

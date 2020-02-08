@@ -11,4 +11,5 @@ public interface AccountRepository {
     boolean minusAmount(Account payerAccount, BigDecimal amount);
 
     boolean addBalance(Account payeeAccount, BigDecimal amount);
+
 }

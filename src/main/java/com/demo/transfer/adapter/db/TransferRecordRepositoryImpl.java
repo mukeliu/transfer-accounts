@@ -6,6 +6,7 @@ import com.demo.transfer.domain.repository.TransferRecordRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * description: AccountRepositoryImpl <br>
@@ -18,7 +19,6 @@ public class TransferRecordRepositoryImpl implements TransferRecordRepository {
 
     @Override
     public void save(TransferRecord transferRecord) {
-
     }
 
     @Override
@@ -27,12 +27,17 @@ public class TransferRecordRepositoryImpl implements TransferRecordRepository {
     }
 
     @Override
-    public TransferRecord findByOrderSeq(String orderSeq) {
+    public Optional<TransferRecord> findByOrderSeq(String orderSeq) {
         return null;
     }
 
     @Override
     public List<TransferRecord> findByStatus(TransferStatus status) {
         return null;
+    }
+
+    @Override
+    public Optional<TransferRecord> selectByOrderSeqForUpdate(String orderSeq) {
+        return Optional.empty();
     }
 }

@@ -19,6 +19,7 @@ public class Transfer {
     private String comment;
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
+    private TransferStatus status;
 
     public String getOrderSeq() {
         return orderSeq;
@@ -91,4 +92,13 @@ public class Transfer {
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
+
+    public TransferStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransferStatus status) {
+        this.status = status;
+    }
+
 }

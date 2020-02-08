@@ -14,7 +14,6 @@ public class TransferRecord {
     private BigDecimal amount;
     private String comment;
     private TransferStatus status;
-    private TransferType type;
     private String failedMessage;
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
@@ -107,14 +106,6 @@ public class TransferRecord {
         this.endTime = endTime;
     }
 
-    public TransferType getType() {
-        return type;
-    }
-
-    public void setType(TransferType type) {
-        this.type = type;
-    }
-
     public String getFailedMessage() {
         return failedMessage;
     }
@@ -122,4 +113,5 @@ public class TransferRecord {
     public void setFailedMessage(String failedMessage) {
         this.failedMessage = failedMessage;
     }
+
 }
