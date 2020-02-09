@@ -65,7 +65,6 @@ public class TransferService {
 
         // 扣款操作，开启事务
         minusBalance(payerAccount, transferRecord);
-
     }
 
     private void preCheck(Account payerAccount, Account payeeAccount, TransferRecord transferRecord) {
@@ -109,12 +108,14 @@ public class TransferService {
         String messageAddress = mqTemplate.syncSend(new DeductAccountEvent(PREPARE, transferRecord));
         if (messageAddress == null) {
             fail(transferRecord, "预扣款失败");
+            return;
         }
         // 采用乐观锁以version字段作为区分，如果更新的行数为0，则表示转账失败
         boolean success = accountRepository.minusAmount(payerAccount, transferRecord.getAmount())
             && transferRecordRepository.updateTransferStatus(transferRecord, SUCCEED);
         if (!success) {
             fail(transferRecord, "预款失败");
+            return;
         }
         mqTemplate.overrideMessage(messageAddress, new DeductAccountEvent(DONE, transferRecord));
         transferRecordRepository.updateTransferStatus(transferRecord, DEDUCTED);
