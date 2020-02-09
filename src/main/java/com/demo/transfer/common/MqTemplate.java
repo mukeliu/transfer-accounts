@@ -64,4 +64,14 @@ public class MqTemplate {
     public <T> List<MqMessage<T>> retrieveMqMessages(Class<T> clazz, Object... parameters) {
         return Collections.emptyList();
     }
+
+    /**
+     * description: 删除队列指定的消息 <br>
+      * @param address：消息地址
+     * @return: void
+     * date: 2020/2/9 <br>
+     * version: 1.0 <br>
+     */
+    public void deleteMessage(String address) {
+    }
 }

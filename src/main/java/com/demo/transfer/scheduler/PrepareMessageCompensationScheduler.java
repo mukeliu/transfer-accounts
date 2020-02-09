@@ -9,6 +9,7 @@ import com.demo.transfer.domain.repository.TransferRecordRepository;
 import org.springframework.stereotype.Component;
 
 import static com.demo.transfer.common.MqMessageStatus.DONE;
+import static com.demo.transfer.domain.model.TransferStatus.*;
 
 /**
  * description: 补偿扣款时，步骤 3 发送确认消息丢失的情况，主要思路为：
@@ -35,9 +36,13 @@ public class PrepareMessageCompensationScheduler {
             .forEach(mqMessage -> {
                 String orderSeq = ((DeductAccountEvent) mqMessage.getPayload()).getTransferRecord().getOrderSeq();
                 transferRecordRepository.findByOrderSeq(orderSeq)
-                    .filter(transferRecord -> transferRecord.getStatus() == TransferStatus.DEDUCTED)
                     .ifPresent(transferRecord -> {
-                        mqTemplate.overrideMessage(mqMessage.getAddress(), new DeductAccountEvent(DONE, transferRecord));
+                        TransferStatus transferStatus = transferRecord.getStatus();
+                        if (transferStatus == FAILED || transferStatus == BEGIN) {
+                            mqTemplate.deleteMessage(mqMessage.getAddress());
+                        } else if (transferStatus == DEDUCTED) {
+                            mqTemplate.overrideMessage(mqMessage.getAddress(), new DeductAccountEvent(DONE, transferRecord));
+                        }
                     });
             });
     }
