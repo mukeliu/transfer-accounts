@@ -1,0 +1,6 @@
+async:
+  pool:
+    core-pool-size: 20
+    max-pool-size: 100
+    keep-alive-seconds: 60
+    queue-capacity: 100000

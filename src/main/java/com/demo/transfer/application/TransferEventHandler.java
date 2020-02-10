@@ -1,39 +1,51 @@
 package com.demo.transfer.application;
 
-import com.demo.transfer.domain.exception.TransferRecordNotFoundException;
-import com.demo.transfer.domain.model.TransferRecord;
+import com.demo.transfer.domain.model.transfer.TransferRecord;
 import com.demo.transfer.domain.repository.TransferRecordRepository;
+import com.demo.transfer.domain.service.AccountService;
 import com.demo.transfer.domain.service.NotifyService;
-import com.demo.transfer.domain.service.TransferService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * description: TransferEventHandler <br>
+ * description: 交易事件处理器 <br>
  * date: 2020/2/8 <br>
  * author: Kehong <br>
  * version: 1.0 <br>
  */
 @Service
 public class TransferEventHandler {
-    private final TransferService transferService;
+    private final AccountService accountService;
     private final NotifyService notifyService;
     private final TransferRecordRepository transferRecordRepository;
 
-    public TransferEventHandler(TransferService transferService,
+    @Autowired
+    public TransferEventHandler(AccountService accountService,
                                 NotifyService notifyService,
                                 TransferRecordRepository transferRecordRepository) {
-        this.transferService = transferService;
+        this.accountService = accountService;
         this.notifyService = notifyService;
         this.transferRecordRepository = transferRecordRepository;
     }
 
+    /**
+     * description: 处理收款流程 <br>
+     *
+     * @param orderSeq： 交易流水号
+     * @return: boolean
+     * date: 2020/2/9 <br>
+     * version: 1.0 <br>
+     */
     public boolean receipt(String orderSeq) {
-        TransferRecord transferRecord = transferRecordRepository.findByOrderSeq(orderSeq)
-            .orElseThrow(() -> new TransferRecordNotFoundException(orderSeq));
-        boolean success = transferService.receipt(transferRecord);
-        if (success) {
-            notifyService.notifyAsync(transferRecord);
+        TransferRecord transferRecord = transferRecordRepository.findByOrderSeq(orderSeq);
+        try {
+            boolean success = accountService.addBalance(transferRecord);
+            if (success) {
+                notifyService.notifyAsync(transferRecord);
+            }
+            return success;
+        } catch (Exception e) {
+            return false;
         }
-        return success;
     }
 }

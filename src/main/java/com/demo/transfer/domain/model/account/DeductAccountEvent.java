@@ -1,10 +1,8 @@
-package com.demo.transfer.domain.model;
+package com.demo.transfer.domain.model.account;
 
 import com.demo.transfer.common.BaseEvent;
 import com.demo.transfer.common.MqMessageStatus;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import com.demo.transfer.domain.model.transfer.TransferRecord;
 
 /**
  * description: 账户扣款事件 <br>

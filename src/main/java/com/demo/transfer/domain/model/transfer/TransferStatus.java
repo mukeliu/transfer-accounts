@@ -1,8 +1,9 @@
-package com.demo.transfer.domain.model;
+package com.demo.transfer.domain.model.transfer;
 
 /**
  * description: 交易状态
  *      BEGIN - 开始转账
+ *      DEDUCTING - 扣款中
  *      DEDUCTED - 已扣款
  *      RECEIVING - 收款中
  *      SUCCEED - 成功

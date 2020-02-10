@@ -1,24 +1,23 @@
 package com.demo.transfer.domain.service;
 
 import com.demo.transfer.common.MqTemplate;
-import com.demo.transfer.domain.exception.AccountNotFoundException;
-import com.demo.transfer.domain.exception.TransferException;
 import com.demo.transfer.domain.factory.TransferRecordFactory;
-import com.demo.transfer.domain.model.*;
+import com.demo.transfer.domain.model.account.Account;
+import com.demo.transfer.domain.model.account.DeductAccountEvent;
+import com.demo.transfer.domain.model.transfer.Transfer;
+import com.demo.transfer.domain.model.transfer.TransferRecord;
 import com.demo.transfer.domain.repository.AccountRepository;
 import com.demo.transfer.domain.repository.TransferRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
 
 import static com.demo.transfer.common.MqMessageStatus.DONE;
 import static com.demo.transfer.common.MqMessageStatus.PREPARE;
-import static com.demo.transfer.domain.model.TransferStatus.*;
+import static com.demo.transfer.domain.model.transfer.TransferStatus.*;
 
 @Service
 public class TransferService {
@@ -36,58 +35,41 @@ public class TransferService {
         this.mqTemplate = mqTemplate;
     }
 
-    public TransferRecord transfer(Transfer transfer) {
-        TransferRecord transferRecord = createTransferRecord(transfer);
-        // async
-        doTransfer(transferRecord);
-        return transferRecord;
-    }
-
-    private TransferRecord createTransferRecord(Transfer transfer) {
-        TransferRecord transferRecord = TransferRecordFactory.create(transfer);
-        transferRecordRepository.save(transferRecord);
-        return transferRecord;
-    }
-
-    @Async
-    public void doTransfer(TransferRecord transferRecord) {
-        Account payerAccount = Optional.ofNullable(accountRepository.findByNumber(transferRecord.getPayerAccountNumber()))
-            .orElseThrow(() -> new AccountNotFoundException(transferRecord, transferRecord.getPayerAccountNumber()));
-        Account payeeAccount = Optional.ofNullable(accountRepository.findByNumber(transferRecord.getPayeeAccountNumber()))
-            .orElseThrow(() -> new AccountNotFoundException(transferRecord, transferRecord.getPayeeAccountNumber()));
-
-        // 账户预检查，包括收/扣款账户姓名、状态、余额等等
+    /**
+     * description: 创建转账记录，防止重复转账，以 orderSeq 作为唯一约束
+     * 如果抛 DuplicateKeyException 异常，表明库中已经存在该记录，直接
+     * 查询返回库中的转账记录
+     *
+     * @param transfer： 转账对象，包含转账相关信息
+     * @return: com.demo.transfer.domain.model.transfer.TransferRecord
+     * date: 2020/2/9 <br>
+     * version: 1.0 <br>
+     */
+    public TransferRecord findExistedOrCreateTransferRecord(Transfer transfer) {
         try {
-            preCheck(payerAccount, payeeAccount, transferRecord);
-        } catch (TransferException e) {
-            fail(transferRecord, e.getMessage());
-        }
-
-        // 扣款操作，开启事务
-        minusBalance(payerAccount, transferRecord);
-    }
-
-    private void preCheck(Account payerAccount, Account payeeAccount, TransferRecord transferRecord) {
-        if (!payerAccount.isNormal()) {
-            throw new TransferException(String.format("账户状态[%s]不支持转账", payerAccount.getStatus()));
-        }
-
-        if (!payeeAccount.isNormal()) {
-            throw new TransferException(String.format("账户状态[%s]不支持转账", payeeAccount.getStatus()));
-        }
-
-        if (!Objects.equals(payerAccount.getName(), transferRecord.getPayerName())) {
-            throw new TransferException("扣款人账户姓名不匹配");
-        }
-
-        if (!Objects.equals(payeeAccount.getName(), transferRecord.getPayeeName())) {
-            throw new TransferException("收款人账户姓名不匹配");
-        }
-
-        if (!payerAccount.isBalanceSufficient(transferRecord.getAmount())) {
-            throw new TransferException("余额不足");
+            TransferRecord transferRecord = TransferRecordFactory.create(transfer);
+            transferRecordRepository.save(transferRecord);
+            return transferRecord;
+        } catch (DuplicateKeyException e) {
+            return transferRecordRepository.findByOrderSeq(transfer.getOrderSeq());
         }
     }
+
+    /**
+     * description: 转账失败操作 <br>
+     *
+     * @param transferRecord： 转账记录
+     * @param failedMessage:  失败信息
+     * @return: void
+     * date: 2020/2/9 <br>
+     * version: 1.0 <br>
+     */
+    public void fail(TransferRecord transferRecord, String failedMessage) {
+        transferRecord.setFailedMessage(failedMessage);
+        transferRecord.setEndTime(LocalDateTime.now());
+        transferRecordRepository.updateTransferStatus(transferRecord, transferRecord.getStatus(), FAILED);
+    }
+
 
     /**
      * description: 扣款操作，主要分为 3 个步骤：
@@ -112,34 +94,13 @@ public class TransferService {
         }
         // 采用乐观锁以version字段作为区分，如果更新的行数为0，则表示转账失败
         boolean success = accountRepository.minusAmount(payerAccount, transferRecord.getAmount())
-            && transferRecordRepository.updateTransferStatus(transferRecord, SUCCEED);
+            && transferRecordRepository.updateTransferStatus(transferRecord, transferRecord.getStatus(), SUCCEED);
         if (!success) {
             fail(transferRecord, "预款失败");
             return;
         }
         mqTemplate.overrideMessage(messageAddress, new DeductAccountEvent(DONE, transferRecord));
-        transferRecordRepository.updateTransferStatus(transferRecord, DEDUCTED);
-    }
-
-    private void fail(TransferRecord transferRecord, String failedMessage) {
-        transferRecord.setFailedMessage(failedMessage);
-        transferRecord.setEndTime(LocalDateTime.now());
-        transferRecordRepository.updateTransferStatus(transferRecord, FAILED);
-    }
-
-    public boolean receipt(TransferRecord transferRecord) {
-        try {
-            Account payeeAccount = accountRepository.findByNumber(transferRecord.getPayeeAccountNumber());
-            if (payeeAccount == null || !payeeAccount.isNormal()) {
-                return false;
-            }
-            // 调用远程收款
-            accountRepository.addBalance(payeeAccount, transferRecord.getAmount());
-            transferRecordRepository.updateTransferStatus(transferRecord, RECEIVING);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        transferRecordRepository.updateTransferStatus(transferRecord, BEGIN, DEDUCTED);
     }
 
     /**

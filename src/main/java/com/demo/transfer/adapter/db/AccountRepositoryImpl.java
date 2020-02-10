@@ -1,6 +1,7 @@
 package com.demo.transfer.adapter.db;
 
-import com.demo.transfer.domain.model.Account;
+import com.demo.transfer.domain.model.account.Account;
+import com.demo.transfer.domain.model.account.AccountRecord;
 import com.demo.transfer.domain.repository.AccountRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,11 +22,22 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public boolean minusAmount(Account payerAccount, BigDecimal amount) {
+        // update amount set amount = amount - #{amount},version_id =  #{versionId} + 1
+        // where accountId = #{accountId} and version_id = #{versionId}
+        // 比较更新行数，行数 > 0 则为 true
         return true;
     }
 
     @Override
     public boolean addBalance(Account payeeAccount, BigDecimal amount) {
+        // update amount set amount = amount + #{amount},version_id =  #{versionId} + 1
+        // where accountId = #{accountId} and version_id = #{versionId}
+        // 比较更新行数，行数 > 0 则为 true
         return true;
+    }
+
+    @Override
+    public void saveAccountRecord(AccountRecord accountRecord) {
+        // insert
     }
 }

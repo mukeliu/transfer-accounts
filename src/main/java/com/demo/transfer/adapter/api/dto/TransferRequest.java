@@ -1,61 +1,53 @@
 package com.demo.transfer.adapter.api.dto;
 
-import com.demo.transfer.domain.model.Transfer;
-import com.demo.transfer.domain.model.TransferRecord;
+import com.demo.transfer.domain.model.transfer.Transfer;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
+/**
+ * description: 转账请求入参 <br>
+ * date: 2020/2/9 <br>
+ * author: Kehong <br>
+ * version: 1.0 <br>
+ */
+@ApiModel("转账请求入参")
 public class TransferRequest {
 
-    /**
-     * 加密信息,用于安全验证
-     */
-    @NotEmpty(message = "请求非法")
+    @ApiModelProperty(value = "密钥", name = "secret")
+    @NotEmpty(message = "密码不能为空")
     private String secret;
 
-    /**
-     * 交易单号
-     */
+    @ApiModelProperty(value = "交易流水号", name = "orderSeq")
     @NotEmpty(message = "交易单号不能为空")
     private String orderSeq;
 
-    /**
-     * 交易金额
-     */
+    @ApiModelProperty(value = "交易金额", name = "amount")
     @NotNull(message = "交易金额不能为空")
     @Digits(integer = 11, fraction = 2, message = "整数部分不超过11位,小数点后不超过2位")
     private BigDecimal amount;
 
-    /**
-     * 付款人账号
-     */
+    @ApiModelProperty(value = "付款人账号", name = "payerAccountNumber")
     @NotEmpty(message = "付款账号不能为空")
     private String payerAccountNumber;
 
-    /**
-     * 付款人姓名
-     */
+    @ApiModelProperty(value = "付款人姓名", name = "payerName")
     @NotEmpty(message = "付款人姓名不能为空")
     private String payerName;
 
-    /**
-     * 收款人账号
-     */
+    @ApiModelProperty(value = "收款人账号", name = "payeeAccountNumber")
     @NotEmpty(message = "收款账号不能为空")
     private String payeeAccountNumber;
 
-    /**
-     * 收款人账号
-     */
+    @ApiModelProperty(value = "收款人姓名", name = "payeeName")
     @NotEmpty(message = "收款人姓名不能为空")
     private String payeeName;
 
-    /**
-     * 备注
-     */
+    @ApiModelProperty(value = "转账留言", name = "comment")
     private String comment;
 
     public Transfer toTransfer() {

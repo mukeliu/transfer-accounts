@@ -1,14 +1,14 @@
 package com.demo.transfer.scheduler;
 
-import com.demo.transfer.domain.model.TransferStatus;
+import com.demo.transfer.domain.model.transfer.TransferStatus;
 import com.demo.transfer.domain.repository.TransferRecordRepository;
 import com.demo.transfer.domain.service.TransferService;
 import org.springframework.stereotype.Component;
 
-import static com.demo.transfer.domain.model.TransferStatus.FAILED;
+import static com.demo.transfer.domain.model.transfer.TransferStatus.FAILED;
 
 /**
- * description: FailedReceiptTransferCompensation <br>
+ * description: 补偿扣款成功，但收款永远失败的情况 <br>
  * date: 2020/2/8 <br>
  * author: Kehong <br>
  * version: 1.0 <br>
@@ -25,6 +25,7 @@ public class FailedReceiptTransferCompensationScheduler {
     }
 
     public void execute() {
+        // 获取所有处于 RECEIVING
         transferRecordRepository.findByStatus(TransferStatus.RECEIVING).stream()
             .peek(transferRecord -> {
                 TransferStatus transferStatus = transferRecordRepository.queryReceiptStatus(transferRecord.getOrderSeq());

@@ -1,16 +1,16 @@
 package com.demo.transfer.domain.factory;
 
-import com.demo.transfer.domain.model.Transfer;
-import com.demo.transfer.domain.model.TransferRecord;
+import com.demo.transfer.domain.model.transfer.Transfer;
+import com.demo.transfer.domain.model.transfer.TransferRecord;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static com.demo.transfer.domain.model.TransferStatus.BEGIN;
+import static com.demo.transfer.domain.model.transfer.TransferStatus.BEGIN;
 
 /**
- * description: TransferRecordFactory <br>
+ * description: 交易记录工厂类，负责创建交易记录 <br>
  * date: 2020/2/8 1:33 <br>
  * author: kehong <br>
  * version: 1.0 <br>

@@ -1,6 +1,5 @@
 package com.demo.transfer.domain.exception;
 
-import com.demo.transfer.TransferApplication;
 import com.demo.transfer.common.GlobalException;
 
 public class TransferException extends GlobalException {

@@ -1,25 +1,63 @@
-package com.demo.transfer.domain.model;
+package com.demo.transfer.domain.model.payment;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * description: Transfer <br>
- * date: 2020/2/8 11:13 <br>
+ * description: 支付对象 <br>
+ * date: 2020/2/9 <br>
  * author: Kehong <br>
  * version: 1.0 <br>
  */
-public class Transfer {
+public class Payment {
+    /**
+     * id
+     */
+    private String id;
+    /**
+     * 交易流水号
+     */
     private String orderSeq;
+    /**
+     * 付款人账号
+     */
     private String payerAccountNumber;
+    /**
+     * 付款人姓名
+     */
     private String payerName;
+    /**
+     * 收款人账号
+     */
     private String payeeAccountNumber;
+    /**
+     * 收款人姓名
+     */
     private String payeeName;
+    /**
+     * 转账金额
+     */
     private BigDecimal amount;
-    private String comment;
-    private LocalDateTime beginTime;
-    private LocalDateTime endTime;
-    private TransferStatus status;
+    /**
+     * 支付状态
+     */
+    private PaymentStatus status;
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdTime;
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedTime;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getOrderSeq() {
         return orderSeq;
@@ -69,36 +107,27 @@ public class Transfer {
         this.amount = amount;
     }
 
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public LocalDateTime getBeginTime() {
-        return beginTime;
-    }
-
-    public void setBeginTime(LocalDateTime beginTime) {
-        this.beginTime = beginTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public TransferStatus getStatus() {
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TransferStatus status) {
+    public void setStatus(PaymentStatus status) {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public LocalDateTime getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(LocalDateTime updatedTime) {
+        this.updatedTime = updatedTime;
+    }
 }

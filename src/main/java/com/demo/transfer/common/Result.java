@@ -1,16 +1,30 @@
 package com.demo.transfer.common;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * description: api接口返回结果封装类 <br>
+ * date: 2020/2/8 <br>
+ * author: Kehong <br>
+ * version: 1.0 <br>
+ */
 @Data
 @NoArgsConstructor
 public class Result<T> {
+    /**
+     * 请求处理是否成功
+     */
     private boolean success;
 
+    /**
+     * 响应数据
+     */
     private T data;
 
+    /**
+     * 异常信息
+     */
     private String errorMessage;
 
 

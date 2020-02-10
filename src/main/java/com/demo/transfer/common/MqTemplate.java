@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * description: MqTemplate <br>
+ * description: MQ操作模板类 <br>
  * date: 2020/2/8 <br>
  * author: Kehong <br>
  * version: 1.0 <br>

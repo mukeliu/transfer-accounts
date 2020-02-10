@@ -1,21 +1,47 @@
 package com.demo.transfer.adapter.api.dto;
 
-import com.demo.transfer.domain.model.Transfer;
-import com.demo.transfer.domain.model.TransferRecord;
-import com.demo.transfer.domain.model.TransferStatus;
+import com.demo.transfer.domain.model.transfer.TransferRecord;
+import com.demo.transfer.domain.model.transfer.TransferStatus;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * description: 转账结果响应 <br>
+ * date: 2020/2/9 <br>
+ * author: Kehong <br>
+ * version: 1.0 <br>
+ */
+@ApiModel("转账结果Response")
 public class TransferResponse {
+
+    @ApiModelProperty(value = "交易流水号", name = "orderSeq")
     private String orderSeq;
+
+    @ApiModelProperty(value = "付款人账户号", name = "payerAccountNumber")
     private String payerAccountNumber;
+
+    @ApiModelProperty(value = "付款人姓名", name = "payerName")
     private String payerName;
+
+    @ApiModelProperty(value = "收款人账户号", name = "payeeAccountNumber")
     private String payeeAccountNumber;
+
+    @ApiModelProperty(value = "收款人姓名", name = "payeeName")
     private String payeeName;
+
+    @ApiModelProperty(value = "转账金额", name = "amount")
     private BigDecimal amount;
+
+    @ApiModelProperty(value = "转账开始时间", name = "beginTime")
     private LocalDateTime beginTime;
+
+    @ApiModelProperty(value = "转账结束时间", name = "endTime")
     private LocalDateTime endTime;
+
+    @ApiModelProperty(value = "交易状态", name = "status")
     private TransferStatus status;
 
     public static TransferResponse from(TransferRecord transferRecord) {

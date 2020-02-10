@@ -1,12 +1,11 @@
 package com.demo.transfer.adapter.db;
 
-import com.demo.transfer.domain.model.TransferRecord;
-import com.demo.transfer.domain.model.TransferStatus;
+import com.demo.transfer.domain.model.transfer.TransferRecord;
+import com.demo.transfer.domain.model.transfer.TransferStatus;
 import com.demo.transfer.domain.repository.TransferRecordRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * description: AccountRepositoryImpl <br>
@@ -22,12 +21,17 @@ public class TransferRecordRepositoryImpl implements TransferRecordRepository {
     }
 
     @Override
-    public boolean updateTransferStatus(TransferRecord transferRecord, TransferStatus newStatus) {
-        return true;
+    public boolean updateTransferStatus(TransferRecord transferRecord, TransferStatus oldStatus, TransferStatus newStatus) {
+        String orderSeq = transferRecord.getOrderSeq();
+
+        // update transfer_record set ..., status = new status where  orderSeq = #{orderSeq} and status = #{oldStatus};
+        // 更新行数
+        int updatedLines = 0;
+        return updatedLines > 0;
     }
 
     @Override
-    public Optional<TransferRecord> findByOrderSeq(String orderSeq) {
+    public TransferRecord findByOrderSeq(String orderSeq) {
         return null;
     }
 
@@ -37,7 +41,8 @@ public class TransferRecordRepositoryImpl implements TransferRecordRepository {
     }
 
     @Override
-    public Optional<TransferRecord> selectByOrderSeqForUpdate(String orderSeq) {
-        return Optional.empty();
+    public TransferStatus queryReceiptStatus(String orderSeq) {
+        return null;
     }
+
 }

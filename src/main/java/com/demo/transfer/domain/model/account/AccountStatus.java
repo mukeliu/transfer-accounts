@@ -1,4 +1,4 @@
-package com.demo.transfer.domain.model;
+package com.demo.transfer.domain.model.account;
 
 /**
  * description: 账户状态 <br>
